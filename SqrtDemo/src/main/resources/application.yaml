@@ -1,0 +1,10 @@
+#server:
+#  tomcat:
+#    accept-count: 200
+#    max-threads: 500
+#
+# ??????
+spring:
+  mvc:
+    servlet:
+      load-on-startup: 1
