@@ -1,9 +1,16 @@
 #server:
 #  tomcat:
-#    accept-count: 200
-#    max-threads: 500
-#
-# ??????
+#    accept-count: 100
+#    max-threads: 200
+#  port: 8081
+#server:
+#  tomcat:
+#    accept-count: 500
+#    max-threads: 1000
+#    min-spare-threads: 50
+#  port: 8081
+
+# eager load
 spring:
   mvc:
     servlet:

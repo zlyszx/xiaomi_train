@@ -1,6 +1,8 @@
 package org.example.sqrtdemo.controller;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
+import org.example.sqrtdemo.service.AsyncService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,6 +11,9 @@ import java.util.Random;
 
 @RestController
 public class SqrtController {
+
+    @Autowired
+    private AsyncService asyncService;
 
     /**
      * 功能：计算整型数据number的平方根，并模拟100-200ms的延迟
@@ -45,4 +50,17 @@ public class SqrtController {
 
         return sqrtResult;
     }
+
+    /**
+     * 尝试异步,但是报错Connection reset by peer
+     * @param number
+     * @return
+     * @throws InterruptedException
+     */
+    // @GetMapping("/sqrtAsync/{number}")
+    // public double calculateSqrtAsync(@PathVariable("number") int number) throws InterruptedException {
+    //     return asyncService.calculateSqrtAsync(number).join();
+    // }
+
+
 }

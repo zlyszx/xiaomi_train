@@ -6,18 +6,23 @@ import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class App {
 
+    public static int QPS = 200;
+    public static int QUERY_COUNT = 10000;
+
     public static void main(String[] args) throws Exception {
         // funcTest();
-        stressTest(330);
+        // funcTestOrigin();
+        stressTest(QPS, QUERY_COUNT);
+        // mulStressTest(QPS, QUERY_COUNT, 3);
         // maxQpsTest();
     }
 
+    // 本地Tomcat功能测试
     public static void funcTest() throws IOException {
         int count = 0;
         for (int i = 0; i < 10000; i++) {
@@ -30,19 +35,42 @@ public class App {
         System.out.println("成功率:" + count / 10000.0);
     }
 
-    public static void maxQpsTest() throws InterruptedException {
-        int qps = 100;
-        while (stressTest(qps) > 0.9995) {
-            qps += 50;
+    // 云服务器功能测试
+    public static void funcTestOrigin() throws IOException {
+        int count = 0;
+        for (int i = 0; i < 10000; i++) {
+            System.out.println("第" + i + "次调用:");
+            boolean success = HttpClientUtil.sendOriginRequest();
+            if (success) {
+                count++;
+            }
         }
-        System.out.println("最大QPS: "+qps);
+        System.out.println("成功率:" + count / 10000.0);
     }
 
-    public static double stressTest(int qps) throws InterruptedException {
+    public static void maxQpsTest() throws InterruptedException {
+        int qps = 100;
+        int totalCount = 10000;
+        while (stressTest(qps, totalCount) > 0.9995) {
+            qps += 50;
+        }
+        System.out.println("最大QPS: " + qps);
+    }
+
+    public static void mulStressTest(int qps, int totalCount, int num) throws InterruptedException {
+        double avgSuccess = 0;
+        for (int i = 0; i < num; i++) {
+            double success = stressTest(qps, totalCount);
+            avgSuccess += success;
+        }
+        System.out.println("QPS=" + qps + "的平均成功率: " + avgSuccess / num);
+    }
+
+    public static double stressTest(int qps, int totalCount) throws InterruptedException {
         // int qps = 100;
         int threadCount = qps / 5;
         // 10000次测试中，若要满足99.95%可用性，只能失败5次
-        int totalCount = 10000;
+        // int totalCount = 10000;
         int duration = totalCount / qps + 1;
 
         AtomicInteger successCount = new AtomicInteger(0);
@@ -69,6 +97,7 @@ public class App {
                         rateLimiter.acquire();
                         try {
                             boolean success = HttpClientUtil.sendRequest();
+                            // boolean success = HttpClientUtil.sendOriginRequest();
                             if (success) {
                                 successCount.incrementAndGet();
                             }
